@@ -19,12 +19,13 @@ interface NavItem {
 
 interface SidebarProps {
   isSuperAdmin: boolean;
+  userId?: string | null;
   userName?: string | null;
   userRole?: string | null;
   avatarUrl?: string | null;
 }
 
-export function Sidebar({ isSuperAdmin, userName, userRole, avatarUrl }: SidebarProps) {
+export function Sidebar({ isSuperAdmin, userId, userName, userRole, avatarUrl }: SidebarProps) {
   const t = useTranslations("app");
   const tu = useTranslations("users");
   const pathname = usePathname();
@@ -74,28 +75,39 @@ export function Sidebar({ isSuperAdmin, userName, userRole, avatarUrl }: Sidebar
 
       {/* User info + sign out */}
       <div className="border-t p-3 space-y-1">
-        {/* User card */}
-        <div className="flex items-center gap-3 px-3 py-2 rounded-lg">
-          {avatarUrl ? (
-            <img
-              src={avatarUrl}
-              alt={userName ?? ""}
-              className="h-8 w-8 rounded-full object-cover shrink-0"
-            />
-          ) : (
-            <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center shrink-0">
-              <UserCircle className="h-5 w-5 text-muted-foreground" />
-            </div>
-          )}
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">{userName ?? "—"}</p>
-            {userRole && (
-              <p className="text-xs text-muted-foreground truncate">
-                {tu(userRole as any)}
-              </p>
+        {/* User card — links to profile if super_admin */}
+        {isSuperAdmin && userId ? (
+          <Link
+            href={`/users/${userId}`}
+            className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-accent transition-colors"
+          >
+            {avatarUrl ? (
+              <img src={avatarUrl} alt={userName ?? ""} className="h-8 w-8 rounded-full object-cover shrink-0" />
+            ) : (
+              <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center shrink-0">
+                <UserCircle className="h-5 w-5 text-muted-foreground" />
+              </div>
             )}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">{userName ?? "—"}</p>
+              {userRole && <p className="text-xs text-muted-foreground truncate">{tu(userRole as any)}</p>}
+            </div>
+          </Link>
+        ) : (
+          <div className="flex items-center gap-3 px-3 py-2 rounded-lg">
+            {avatarUrl ? (
+              <img src={avatarUrl} alt={userName ?? ""} className="h-8 w-8 rounded-full object-cover shrink-0" />
+            ) : (
+              <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center shrink-0">
+                <UserCircle className="h-5 w-5 text-muted-foreground" />
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">{userName ?? "—"}</p>
+              {userRole && <p className="text-xs text-muted-foreground truncate">{tu(userRole as any)}</p>}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Sign out */}
         <button

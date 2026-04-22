@@ -23,19 +23,42 @@ export async function GET(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  // Generate signed URL using admin client (bypasses RLS, works on Vercel)
   const admin = createSupabaseAdminClient();
-  const { data, error } = await admin.storage
-    .from(doc.storageBucket)
-    .createSignedUrl(doc.storagePath, 300, {
-      download: download
-        ? (doc.title ?? doc.storagePath.split("/").pop() ?? "document")
-        : false,
+
+  if (download) {
+    // Download: fetch the file and stream it back with Content-Disposition header
+    const { data, error } = await admin.storage
+      .from(doc.storageBucket)
+      .download(doc.storagePath);
+
+    if (error || !data) {
+      return NextResponse.json({ error: "Failed to fetch file" }, { status: 500 });
+    }
+
+    // Build filename with extension
+    const storageName = doc.storagePath.split("/").pop() ?? "document";
+    const ext = storageName.includes(".") ? `.${storageName.split(".").pop()}` : "";
+    const baseName = doc.title ?? storageName;
+    const filename = baseName.includes(".") ? baseName : `${baseName}${ext}`;
+    const buffer = await data.arrayBuffer();
+
+    return new NextResponse(buffer, {
+      headers: {
+        "Content-Type": doc.mimeType ?? "application/octet-stream",
+        "Content-Disposition": `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`,
+        "Content-Length": buffer.byteLength.toString(),
+      },
     });
+  } else {
+    // Open: redirect to signed URL (browser handles inline display)
+    const { data, error } = await admin.storage
+      .from(doc.storageBucket)
+      .createSignedUrl(doc.storagePath, 300);
 
-  if (error || !data) {
-    return NextResponse.json({ error: "Failed to generate URL" }, { status: 500 });
+    if (error || !data) {
+      return NextResponse.json({ error: "Failed to generate URL" }, { status: 500 });
+    }
+
+    return NextResponse.redirect(data.signedUrl);
   }
-
-  return NextResponse.redirect(data.signedUrl);
 }

@@ -5,7 +5,7 @@ import { getServerUser } from "@/lib/auth/user";
 import { type ActionResult } from "@/actions/types";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { type Document } from "@prisma/client";
 
 const uploadMetadataSchema = z.object({
@@ -63,7 +63,7 @@ export async function uploadDocument(
 
     const storagePath = `employee/${employeeId}/document/${doc.id}/v1/${safeName}`;
 
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     const { error: uploadError } = await supabase.storage
       .from("employee-documents")
       .upload(storagePath, file, { upsert: false, contentType: file.type });
@@ -96,7 +96,7 @@ export async function deleteDocument(id: string): Promise<ActionResult<null>> {
       return { success: false, error: "errors.notFound" };
     }
 
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     await supabase.storage.from(doc.storageBucket).remove([doc.storagePath]);
 
     await prisma.document.delete({ where: { id } });
@@ -122,7 +122,7 @@ export async function getSignedUrl(
 
     console.log("[getSignedUrl] storagePath:", doc.storagePath, "bucket:", doc.storageBucket);
 
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     const { data, error } = await supabase.storage
       .from(doc.storageBucket)
       .createSignedUrl(doc.storagePath, 300);

@@ -103,6 +103,7 @@ export function DocumentUploadForm({ employeeId, onSuccess, onCancel }: Document
           ref={fileRef}
           type="file"
           className="hidden"
+          accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
           onChange={(e) => setSelectedFile(e.target.files?.[0] ?? null)}
         />
       </div>

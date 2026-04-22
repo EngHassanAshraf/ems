@@ -75,6 +75,41 @@ export async function getUser(id: string): Promise<ActionResult<UserListItem>> {
   };
 }
 
+export async function updateAvatar(userId: string, formData: FormData): Promise<ActionResult<{ avatarUrl: string }>> {
+  const user = await getServerUser();
+  if (!isSuperAdmin(user)) return { success: false, error: "errors.forbidden" };
+
+  const file = formData.get("avatar") as File | null;
+  if (!file || file.size === 0) return { success: false, error: "errors.invalidInput" };
+
+  const supabase = await (await import("@/lib/supabase/server")).createSupabaseServerClient();
+
+  // Remove old avatar if exists
+  const existing = await prisma.userProfile.findUnique({ where: { id: userId }, select: { avatarUrl: true } });
+  if (existing?.avatarUrl) {
+    const oldPath = existing.avatarUrl.split("/avatars/")[1];
+    if (oldPath) await supabase.storage.from("avatars").remove([oldPath]);
+  }
+
+  const ext = file.name.split(".").pop() ?? "jpg";
+  const safeName = `${userId}.${ext}`;
+  const { error: uploadError } = await supabase.storage
+    .from("avatars")
+    .upload(safeName, file, { upsert: true, contentType: file.type });
+
+  if (uploadError) {
+    console.error("[updateAvatar] upload error:", uploadError.message);
+    return { success: false, error: "errors.uploadFailed" };
+  }
+
+  const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(safeName);
+  const avatarUrl = urlData.publicUrl;
+
+  await prisma.userProfile.update({ where: { id: userId }, data: { avatarUrl } });
+  revalidatePath(`/users/${userId}`);
+  return { success: true, data: { avatarUrl } };
+}
+
 export async function listUsers(): Promise<ActionResult<UserListItem[]>> {
   const user = await getServerUser();
   if (!isSuperAdmin(user)) return { success: false, error: "errors.forbidden" };

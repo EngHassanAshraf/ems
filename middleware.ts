@@ -14,7 +14,7 @@ const intlMiddleware = createIntlMiddleware({
 // ---------------------------------------------------------------------------
 // Route classification
 // ---------------------------------------------------------------------------
-const PUBLIC_PATHS = ["/login", "/signup", "/forgot-password"];
+const PUBLIC_PATHS = ["/login", "/forgot-password"];
 
 function isPublicPath(pathname: string): boolean {
   return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + "/"));

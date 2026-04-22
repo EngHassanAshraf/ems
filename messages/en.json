@@ -28,22 +28,11 @@
   "auth": {
     "loginTitle": "Sign In",
     "loginSubtitle": "Enter your credentials to access your account",
-    "signupTitle": "Create Account",
-    "signupSubtitle": "Create your new account",
     "email": "Email",
     "password": "Password",
-    "fullName": "Full Name",
-    "companyNameAr": "Company Name (Arabic)",
     "loginButton": "Sign In",
-    "signupButton": "Create Account",
     "loginError": "Invalid email or password",
-    "invalidCredentials": "Invalid email or password",
-    "signUpError": "Failed to create account. Please try again.",
-    "signupSuccess": "Account created. Please sign in.",
-    "noAccount": "Don't have an account?",
-    "signupLink": "Sign up",
-    "hasAccount": "Already have an account?",
-    "loginLink": "Sign in"
+    "invalidCredentials": "Invalid email or password"
   },
   "errors": {
     "invalidInput": "Please check your input and try again."

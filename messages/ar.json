@@ -28,22 +28,11 @@
   "auth": {
     "loginTitle": "تسجيل الدخول",
     "loginSubtitle": "أدخل بياناتك للوصول إلى حسابك",
-    "signupTitle": "إنشاء حساب",
-    "signupSubtitle": "أنشئ حسابك الجديد",
     "email": "البريد الإلكتروني",
     "password": "كلمة المرور",
-    "fullName": "الاسم الكامل",
-    "companyNameAr": "اسم الشركة بالعربية",
     "loginButton": "دخول",
-    "signupButton": "إنشاء الحساب",
     "loginError": "البريد الإلكتروني أو كلمة المرور غير صحيحة",
-    "invalidCredentials": "البريد الإلكتروني أو كلمة المرور غير صحيحة",
-    "signUpError": "فشل إنشاء الحساب. يرجى المحاولة مرة أخرى.",
-    "signupSuccess": "تم إنشاء الحساب. يرجى تسجيل الدخول.",
-    "noAccount": "ليس لديك حساب؟",
-    "signupLink": "إنشاء حساب",
-    "hasAccount": "لديك حساب بالفعل؟",
-    "loginLink": "تسجيل الدخول"
+    "invalidCredentials": "البريد الإلكتروني أو كلمة المرور غير صحيحة"
   },
   "errors": {
     "invalidInput": "يرجى التحقق من المدخلات والمحاولة مرة أخرى."

@@ -15,21 +15,16 @@ import { createUser, updateUserRole } from "@/actions/users";
 import type { UserListItem } from "@/actions/users";
 import type { SiteRow } from "@/features/sites/sites-client";
 
-const createSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8),
-  fullNameAr: z.string().min(1),
+// Single schema covering both create and edit — new-user fields are optional on edit
+const schema = z.object({
+  email: z.string().email().optional().or(z.literal("")),
+  password: z.string().min(8).optional().or(z.literal("")),
+  fullNameAr: z.string().min(1).optional().or(z.literal("")),
   role: z.enum(["super_admin", "site_admin"]),
   siteId: z.string().optional().nullable(),
 });
 
-const editSchema = z.object({
-  role: z.enum(["super_admin", "site_admin"]),
-  siteId: z.string().optional().nullable(),
-});
-
-type CreateValues = z.infer<typeof createSchema>;
-type EditValues = z.infer<typeof editSchema>;
+type FormValues = z.infer<typeof schema>;
 
 interface UserFormProps {
   user?: UserListItem;
@@ -44,32 +39,37 @@ export function UserForm({ user, sites, onSuccess, onCancel }: UserFormProps) {
   const { toast } = useToast();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-
   const isEdit = !!user;
 
-  const createForm = useForm<CreateValues>({
-    resolver: zodResolver(createSchema) as any,
-    defaultValues: { role: "site_admin", siteId: "" },
+  const { register, handleSubmit, control, formState: { errors, isSubmitting } } = useForm<FormValues>({
+    resolver: zodResolver(schema) as any,
+    defaultValues: {
+      email: "",
+      password: "",
+      fullNameAr: user?.fullNameAr ?? "",
+      role: (user?.role as "super_admin" | "site_admin") ?? "site_admin",
+      siteId: user?.siteId ?? "",
+    },
   });
 
-  const editForm = useForm<EditValues>({
-    resolver: zodResolver(editSchema) as any,
-    defaultValues: { role: (user?.role as any) ?? "site_admin", siteId: user?.siteId ?? "" },
-  });
+  const role = useWatch({ control, name: "role" });
 
-  const form = isEdit ? editForm : createForm;
-  const role = useWatch({ control: form.control, name: "role" });
-
-  const onSubmit = (values: CreateValues | EditValues) => {
+  const onSubmit = (values: FormValues) => {
     startTransition(async () => {
       let result;
       if (isEdit) {
         result = await updateUserRole(user!.id, {
-          role: (values as EditValues).role,
-          siteId: (values as EditValues).siteId || null,
+          role: values.role,
+          siteId: values.siteId || null,
         });
       } else {
-        result = await createUser(values as CreateValues);
+        result = await createUser({
+          email: values.email!,
+          password: values.password!,
+          fullNameAr: values.fullNameAr!,
+          role: values.role,
+          siteId: values.siteId || null,
+        });
       }
 
       if (!result.success) {
@@ -84,35 +84,34 @@ export function UserForm({ user, sites, onSuccess, onCancel }: UserFormProps) {
   };
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit as any)} className="flex flex-col gap-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
       {!isEdit && (
         <>
-          <FormField label={t("name")} error={(createForm.formState.errors as any).fullNameAr?.message} required>
-            <Input dir="rtl" {...createForm.register("fullNameAr")} />
+          <FormField label={t("name")} error={errors.fullNameAr?.message} required>
+            <Input dir="rtl" {...register("fullNameAr")} />
           </FormField>
-          <FormField label={t("email")} error={(createForm.formState.errors as any).email?.message} required>
-            <Input type="email" dir="ltr" {...createForm.register("email")} />
+          <FormField label={t("email")} error={errors.email?.message} required>
+            <Input type="email" dir="ltr" {...register("email")} />
           </FormField>
-          <FormField label={t("password")} error={(createForm.formState.errors as any).password?.message} required>
-            <Input type="password" {...createForm.register("password")} />
+          <FormField label={t("password")} error={errors.password?.message} required>
+            <Input type="password" {...register("password")} />
           </FormField>
         </>
       )}
 
-      <FormField label={t("role")} error={(form.formState.errors as any).role?.message} required>
-        <Select {...form.register("role")}>
+      <FormField label={t("role")} error={errors.role?.message} required>
+        <Select {...register("role")}>
           <option value="site_admin">{t("site_admin")}</option>
           <option value="super_admin">{t("super_admin")}</option>
         </Select>
       </FormField>
 
-      {/* Site dropdown shown for all roles — required only for site_admin */}
       <FormField
         label={t("site")}
-        error={(form.formState.errors as any).siteId?.message}
+        error={errors.siteId?.message}
         required={role === "site_admin"}
       >
-        <Select {...form.register("siteId")}>
+        <Select {...register("siteId")}>
           <option value="">{t("selectSite")}</option>
           {sites.map((s) => (
             <option key={s.id} value={s.id}>{s.nameAr}</option>
@@ -122,7 +121,7 @@ export function UserForm({ user, sites, onSuccess, onCancel }: UserFormProps) {
 
       <div className="flex justify-end gap-3 pt-2">
         <Button type="button" variant="outline" onClick={onCancel}>{tc("cancel")}</Button>
-        <Button type="submit" loading={isPending}>
+        <Button type="submit" loading={isSubmitting || isPending}>
           {isEdit ? tc("save") : t("addUser")}
         </Button>
       </div>

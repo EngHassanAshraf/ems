@@ -1,0 +1,145 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum EmployeeStatus {
+  active
+  fired
+
+  @@map("employee_status")
+}
+
+enum DocumentType {
+  introduction
+  contract
+  attachment
+
+  @@map("document_type")
+}
+
+enum UserRole {
+  super_admin
+  site_admin
+
+  @@map("user_role")
+}
+
+model UserProfile {
+  id         String    @id @db.Uuid
+  fullNameAr String?   @map("full_name_ar")
+  phone      String?
+  email      String?
+  avatarUrl  String?   @map("avatar_url")
+  isActive   Boolean   @default(true) @map("is_active")
+  role       UserRole  @default(site_admin) @map("role")
+  siteId     String?   @map("site_id") @db.Uuid
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  site       Site?     @relation(fields: [siteId], references: [id])
+
+  @@map("user_profiles")
+}
+
+model Site {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nameAr    String   @map("name_ar")
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  employees    Employee[]
+  userProfiles UserProfile[]
+
+  @@map("sites")
+}
+
+model JobTitle {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nameAr    String   @map("name_ar")
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  employees Employee[]
+
+  @@map("job_titles")
+}
+
+model Employee {
+  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  authUserId   String?        @unique @map("auth_user_id") @db.Uuid
+  nameAr       String         @map("name_ar")
+  email        String?
+  phone        String?
+  address      String?
+  hireDate     DateTime?      @map("hire_date") @db.Date
+  status       EmployeeStatus @default(active)
+  firedReason  String?        @map("fired_reason")
+  siteId       String?        @map("site_id") @db.Uuid
+  jobTitleId   String?        @map("job_title_id") @db.Uuid
+  createdAt    DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  site             Site?             @relation(fields: [siteId], references: [id])
+  jobTitle         JobTitle?         @relation(fields: [jobTitleId], references: [id])
+  documents        Document[]
+  attendanceEvents AttendanceEvent[]
+  leaveRequests    LeaveRequest[]
+
+  @@map("employees")
+}
+
+model Document {
+  id            String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employeeId    String       @map("employee_id") @db.Uuid
+  type          DocumentType
+  title         String?
+  description   String?
+  storageBucket String       @default("employee-documents") @map("storage_bucket")
+  storagePath   String       @map("storage_path")
+  mimeType      String?      @map("mime_type")
+  byteSize      BigInt?      @map("byte_size")
+  version       Int          @default(1)
+  uploadedAt    DateTime     @default(now()) @map("uploaded_at") @db.Timestamptz
+  createdAt     DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@map("documents")
+}
+
+model AttendanceEvent {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employeeId String   @map("employee_id") @db.Uuid
+  eventType  String   @map("event_type")
+  occurredAt DateTime @map("occurred_at") @db.Timestamptz
+  source     String?
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@map("attendance_events")
+}
+
+model LeaveRequest {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employeeId String   @map("employee_id") @db.Uuid
+  leaveType  String   @map("leave_type")
+  startDate  DateTime @map("start_date") @db.Date
+  endDate    DateTime @map("end_date") @db.Date
+  status     String   @default("pending")
+  reason     String?
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@map("leave_requests")
+}

@@ -1,0 +1,18 @@
+{
+  "enabled": true,
+  "name": "Postman API Tests on Change",
+  "description": "Runs the Postman collection test suite whenever data layer or feature files are modified",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "src/data/*.ts",
+      "src/features/**/*.ts",
+      "src/features/**/*.tsx"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Source files changed. Read .postman.json to get the collection and environment IDs. Then run the Postman collection tests and report results. If any tests fail, investigate and propose fixes."
+  }
+}

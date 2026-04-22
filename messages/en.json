@@ -137,6 +137,8 @@
     "selectSite": "Select site",
     "super_admin": "Super Admin",
     "site_admin": "Site Admin",
+    "site_security_manager": "Site Security Manager",
+    "site_security_manager": "Site Security Manager",
     "createSuccess": "User created successfully",
     "updateSuccess": "User updated successfully",
     "deleteSuccess": "User deleted",

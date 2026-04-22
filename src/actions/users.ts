@@ -20,7 +20,7 @@ const createUserSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
   fullNameAr: z.string().min(1),
-  role: z.enum(["super_admin", "site_admin"]),
+  role: z.enum(["super_admin", "site_admin", "site_security_manager"]),
   siteId: z.string().uuid().optional().nullable(),
 });
 
@@ -68,8 +68,8 @@ export async function createUser(input: unknown): Promise<ActionResult<{ id: str
 
   const { email, password, fullNameAr, role, siteId } = parsed.data;
 
-  // site_admin must have a site assigned
-  if (role === "site_admin" && !siteId) {
+  // site_admin and site_security_manager must have a site assigned
+  if (role !== "super_admin" && !siteId) {
     return { success: false, error: "errors.siteRequired" };
   }
 
@@ -127,7 +127,7 @@ export async function createUser(input: unknown): Promise<ActionResult<{ id: str
 
 export async function updateUserRole(
   id: string,
-  input: { role: "super_admin" | "site_admin"; siteId?: string | null }
+  input: { role: "super_admin" | "site_admin" | "site_security_manager"; siteId?: string | null }
 ): Promise<ActionResult<null>> {
   const user = await getServerUser();
   if (!isSuperAdmin(user)) return { success: false, error: "errors.forbidden" };

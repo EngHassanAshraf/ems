@@ -20,7 +20,7 @@ const schema = z.object({
   email: z.string().email().optional().or(z.literal("")),
   password: z.string().min(8).optional().or(z.literal("")),
   fullNameAr: z.string().min(1).optional().or(z.literal("")),
-  role: z.enum(["super_admin", "site_admin"]),
+  role: z.enum(["super_admin", "site_admin", "site_security_manager"]),
   siteId: z.string().optional().nullable(),
 });
 
@@ -47,7 +47,7 @@ export function UserForm({ user, sites, onSuccess, onCancel }: UserFormProps) {
       email: "",
       password: "",
       fullNameAr: user?.fullNameAr ?? "",
-      role: (user?.role as "super_admin" | "site_admin") ?? "site_admin",
+      role: (user?.role as "super_admin" | "site_admin" | "site_security_manager") ?? "site_admin",
       siteId: user?.siteId ?? "",
     },
   });
@@ -102,6 +102,7 @@ export function UserForm({ user, sites, onSuccess, onCancel }: UserFormProps) {
       <FormField label={t("role")} error={errors.role?.message} required>
         <Select {...register("role")}>
           <option value="site_admin">{t("site_admin")}</option>
+          <option value="site_security_manager">{t("site_security_manager")}</option>
           <option value="super_admin">{t("super_admin")}</option>
         </Select>
       </FormField>
@@ -109,7 +110,7 @@ export function UserForm({ user, sites, onSuccess, onCancel }: UserFormProps) {
       <FormField
         label={t("site")}
         error={errors.siteId?.message}
-        required={role === "site_admin"}
+        required={role === "site_admin" || role === "site_security_manager"}
       >
         <Select {...register("siteId")}>
           <option value="">{t("selectSite")}</option>

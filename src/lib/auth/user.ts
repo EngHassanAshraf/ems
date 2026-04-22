@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 
-export type UserRole = "super_admin" | "site_admin";
+export type UserRole = "super_admin" | "site_admin" | "site_security_manager";
 
 export type ServerUser = {
   id: string;
@@ -17,6 +17,15 @@ export function isSuperAdmin(user: ServerUser) {
 
 export function isSiteAdmin(user: ServerUser) {
   return user.role === "site_admin";
+}
+
+export function isSiteSecurityManager(user: ServerUser) {
+  return user.role === "site_security_manager";
+}
+
+/** Returns true for any site-scoped role (not super_admin) */
+export function isSiteScoped(user: ServerUser) {
+  return !isSuperAdmin(user);
 }
 
 /**

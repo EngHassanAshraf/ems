@@ -24,6 +24,7 @@ enum DocumentType {
 enum UserRole {
   super_admin
   site_admin
+  site_security_manager
 
   @@map("user_role")
 }

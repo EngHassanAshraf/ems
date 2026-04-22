@@ -42,9 +42,38 @@ export type UserListItem = {
   role: string;
   siteId: string | null;
   siteName: string | null;
+  avatarUrl: string | null;
   isActive: boolean;
   createdAt: Date;
 };
+
+export async function getUser(id: string): Promise<ActionResult<UserListItem>> {
+  const user = await getServerUser();
+  if (!isSuperAdmin(user)) return { success: false, error: "errors.forbidden" };
+
+  const profile = await prisma.userProfile.findUnique({
+    where: { id },
+    include: { site: { select: { nameAr: true } } },
+  });
+
+  if (!profile) return { success: false, error: "errors.notFound" };
+
+  return {
+    success: true,
+    data: {
+      id: profile.id,
+      email: profile.email ?? "",
+      fullNameAr: profile.fullNameAr,
+      phone: profile.phone,
+      role: profile.role,
+      siteId: profile.siteId,
+      siteName: (profile as any).site?.nameAr ?? null,
+      avatarUrl: profile.avatarUrl ?? null,
+      isActive: profile.isActive,
+      createdAt: profile.createdAt,
+    },
+  };
+}
 
 export async function listUsers(): Promise<ActionResult<UserListItem[]>> {
   const user = await getServerUser();
@@ -65,6 +94,7 @@ export async function listUsers(): Promise<ActionResult<UserListItem[]>> {
       role: p.role,
       siteId: p.siteId,
       siteName: (p as any).site?.nameAr ?? null,
+      avatarUrl: p.avatarUrl ?? null,
       isActive: p.isActive,
       createdAt: p.createdAt,
     })),

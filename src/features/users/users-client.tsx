@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Plus, Pencil, Trash2, Users } from "lucide-react";
+import { Plus, Pencil, Trash2, Users, Eye } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -89,6 +89,9 @@ export function UsersClient({ users, sites, currentUserId }: UsersClientProps) {
                   </td>
                   <td className="p-3">
                     <div className="flex items-center gap-1">
+                      <Button variant="ghost" size="icon" onClick={() => router.push(`/users/${u.id}`)} title={tc("view")}>
+                        <Eye className="h-4 w-4" />
+                      </Button>
                       <Button variant="ghost" size="icon" onClick={() => openEdit(u)} title={tc("edit")}>
                         <Pencil className="h-4 w-4" />
                       </Button>

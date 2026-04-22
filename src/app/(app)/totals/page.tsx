@@ -1,6 +1,6 @@
 import { getServerUser } from "@/lib/auth/user";
-import { getJobTitleReport } from "@/actions/reports";
-import { ReportsClient } from "@/features/reports/reports-client";
+import { getJobTitleReport } from "@/actions/totals";
+import { ReportsClient } from "@/features/totals/totals-client";
 
 export default async function ReportsPage() {
   await getServerUser(); // ensures auth

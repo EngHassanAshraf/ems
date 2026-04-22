@@ -12,7 +12,7 @@ import { signOut } from "@/actions/auth";
 
 interface NavItem {
   key: string;
-  label: "dashboard" | "employees" | "documents" | "sites" | "users" | "jobTitles" | "reports";
+  label: "dashboard" | "employees" | "documents" | "sites" | "users" | "jobTitles" | "totals";
   href: string;
   icon: React.ReactNode;
 }
@@ -33,7 +33,7 @@ export function Sidebar({ isSuperAdmin, userId, userName, userRole, avatarUrl }:
   const navItems: NavItem[] = [
     { key: "dashboard", label: "dashboard", href: "/dashboard", icon: <LayoutDashboard className="h-5 w-5" /> },
     { key: "employees", label: "employees", href: "/employees", icon: <Users className="h-5 w-5" /> },
-    { key: "reports", label: "reports", href: "/reports", icon: <BarChart3 className="h-5 w-5" /> },
+    { key: "totals", label: "totals", href: "/totals", icon: <BarChart3 className="h-5 w-5" /> },
     ...(isSuperAdmin ? [
       { key: "sites", label: "sites" as const, href: "/sites", icon: <MapPin className="h-5 w-5" /> },
       { key: "users", label: "users" as const, href: "/users", icon: <UserCog className="h-5 w-5" /> },

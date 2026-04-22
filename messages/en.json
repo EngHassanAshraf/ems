@@ -10,7 +10,7 @@
     "sites": "Sites",
     "users": "Users",
     "jobTitles": "Job Titles",
-    "reports": "Reports"
+    "totals": "Totals"
   },
   "common": {
     "search": "Search...",
@@ -177,9 +177,9 @@
     "deleteError": "Failed to delete job title",
     "saveError": "Failed to save job title"
   },
-  "reports": {
+  "totals": {
     "title": "Reports",
-    "subtitle": "Active employees count per job title per site",
+    "subtitle": "Active employees count per job title",
     "site": "Site",
     "total": "Total",
     "noData": "No report data",

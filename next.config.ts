@@ -5,6 +5,9 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  env: {
+    NEXT_TELEMETRY_DISABLED: "1",
+  },
 };
 
 export default withNextIntl(nextConfig);

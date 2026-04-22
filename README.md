@@ -38,7 +38,7 @@ Arabic-first (RTL) employee management system built with Next.js, Supabase, and 
 
 | Role | Access |
 |---|---|
-| `super_admin` | Full access — all sites, all employees, sites/users/job-titles management, reports |
+| `super_admin` | Full access — all sites, all employees, sites/users/job-titles management, totals |
 | `site_admin` | Scoped to their assigned site — can only manage employees of their site |
 
 ---
@@ -155,7 +155,7 @@ npm run typecheck  # TypeScript check (no emit)
 | `/employees` | All | Employee list with filters |
 | `/employees/[id]` | All | Employee detail + documents |
 | `/documents` | All | Document browser |
-| `/reports` | All | Job title × site matrix |
+| `/totals` | All | Job title × site matrix |
 | `/sites` | super_admin | Sites CRUD |
 | `/users` | super_admin | Users management |
 | `/job-titles` | super_admin | Job titles CRUD |
@@ -172,7 +172,7 @@ src/
 │   │   ├── dashboard/
 │   │   ├── employees/
 │   │   ├── documents/
-│   │   ├── reports/
+│   │   ├── totals/
 │   │   ├── sites/
 │   │   ├── users/
 │   │   └── job-titles/
@@ -188,7 +188,7 @@ src/
 │   ├── sites.ts
 │   ├── users.ts
 │   ├── job-titles.ts
-│   └── reports.ts
+│   └── totals.ts
 ├── features/               — UI feature modules
 │   ├── auth/
 │   ├── dashboard/
@@ -197,7 +197,7 @@ src/
 │   ├── sites/
 │   ├── users/
 │   ├── job-titles/
-│   └── reports/
+│   └── totals/
 ├── components/
 │   ├── layout/             — app shell, sidebar, topbar
 │   └── ui/                 — button, input, select, dialog, toast…

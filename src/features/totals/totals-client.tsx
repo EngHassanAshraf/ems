@@ -3,14 +3,14 @@
 import { useTranslations } from "next-intl";
 import { BarChart3 } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
-import type { ReportData } from "@/actions/reports";
+import type { ReportData } from "@/actions/totals";
 
 interface ReportsClientProps {
   data: ReportData;
 }
 
 export function ReportsClient({ data }: ReportsClientProps) {
-  const t = useTranslations("reports");
+  const t = useTranslations("totals");
   const { sites, jobTitles, matrix } = data;
 
   // Compute totals per job title (last row)

@@ -11,7 +11,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/toast";
 import { DocumentUploadForm } from "./document-upload-form";
-import { deleteDocument as deleteDocumentAction, getSignedUrl } from "@/actions/documents";
+import { deleteDocument as deleteDocumentAction } from "@/actions/documents";
 import type { Document } from "@prisma/client";
 
 type DocumentType = "introduction" | "contract" | "attachment";
@@ -37,43 +37,13 @@ export function DocumentsList({ employeeId, companyId, documents, isLoading }: D
   const [isPending, startTransition] = useTransition();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [uploadOpen, setUploadOpen] = useState(false);
-  const [downloading, setDownloading] = useState<string | null>(null);
-  const [opening, setOpening] = useState<string | null>(null);
 
-  const handleOpen = async (doc: Document) => {
-    setOpening(doc.id);
-    try {
-      const result = await getSignedUrl(doc.id);
-      if (!result.success) { toast("error", result.error); return; }
-      window.open(result.data.url, "_blank");
-    } catch (err) {
-      toast("error", (err as Error).message);
-    } finally {
-      setOpening(null);
-    }
+  const handleOpen = (doc: Document) => {
+    window.open(`/api/documents/${doc.id}`, "_blank");
   };
 
-  const handleDownload = async (doc: Document) => {
-    setDownloading(doc.id);
-    try {
-      const result = await getSignedUrl(doc.id);
-      if (!result.success) { toast("error", result.error); return; }
-      // Fetch as blob to force download regardless of content-type
-      const response = await fetch(result.data.url);
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = blobUrl;
-      a.download = doc.title ?? doc.storagePath.split("/").pop() ?? "document";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(blobUrl);
-    } catch (err) {
-      toast("error", (err as Error).message);
-    } finally {
-      setDownloading(null);
-    }
+  const handleDownload = (doc: Document) => {
+    window.location.href = `/api/documents/${doc.id}?download=1`;
   };
 
   const handleDelete = (doc: Document) => {
@@ -102,7 +72,6 @@ export function DocumentsList({ employeeId, companyId, documents, isLoading }: D
 
   return (
     <div>
-      {/* Upload button */}
       <div className="flex justify-end p-4 border-b">
         <Button size="sm" onClick={() => setUploadOpen(true)} className="gap-2">
           <Plus className="h-4 w-4" />
@@ -139,27 +108,14 @@ export function DocumentsList({ employeeId, companyId, documents, isLoading }: D
                 </div>
               </div>
               <div className="flex items-center gap-1 shrink-0">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleOpen(doc)}
-                  disabled={opening === doc.id}
-                  title="فتح"
-                >
-                  {opening === doc.id ? <Spinner className="h-4 w-4" /> : <ExternalLink className="h-4 w-4" />}
+                <Button variant="ghost" size="icon" onClick={() => handleOpen(doc)} title="فتح">
+                  <ExternalLink className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={() => handleDownload(doc)} title={tc("download")}>
+                  <Download className="h-4 w-4" />
                 </Button>
                 <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleDownload(doc)}
-                  disabled={downloading === doc.id}
-                  title={tc("download")}
-                >
-                  {downloading === doc.id ? <Spinner className="h-4 w-4" /> : <Download className="h-4 w-4" />}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
+                  variant="ghost" size="icon"
                   onClick={() => handleDelete(doc)}
                   disabled={deletingId === doc.id || isPending}
                   className="text-destructive hover:text-destructive hover:bg-destructive/10"

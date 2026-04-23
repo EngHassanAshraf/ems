@@ -20,6 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 const schema = z
   .object({
     nameAr: z.string().min(1),
+    employeeCode: z.string().optional().nullable(),
     email: z.string().email().optional().or(z.literal("")).nullable(),
     phone: z.string().optional().nullable(),
     address: z.string().optional().nullable(),
@@ -64,6 +65,7 @@ export function EmployeeForm({ employee, sites, isSuperAdmin, userSiteId, onSucc
     defaultValues: employee
       ? {
           nameAr: employee.nameAr,
+          employeeCode: employee.employeeCode ?? "",
           email: employee.email ?? "",
           phone: employee.phone ?? "",
           address: employee.address ?? "",
@@ -76,6 +78,7 @@ export function EmployeeForm({ employee, sites, isSuperAdmin, userSiteId, onSucc
       : {
           status: "active" as const,
           firedReason: "",
+          employeeCode: "",
           siteId: !isSuperAdmin && userSiteId ? userSiteId : "",
           jobTitleId: "",
         },
@@ -95,6 +98,7 @@ export function EmployeeForm({ employee, sites, isSuperAdmin, userSiteId, onSucc
             hireDate: employee.hireDate ? new Date(employee.hireDate).toISOString().split("T")[0] : "",
             status: employee.status,
             firedReason: employee.firedReason ?? "",
+            employeeCode: employee.employeeCode ?? "",
             siteId: employee.siteId ?? "",
             jobTitleId: employee.jobTitleId ?? "",
           });
@@ -114,6 +118,7 @@ export function EmployeeForm({ employee, sites, isSuperAdmin, userSiteId, onSucc
         address: values.address || null,
         hireDate: values.hireDate || null,
         firedReason: values.status === "fired" ? (values.firedReason || null) : null,
+        employeeCode: values.employeeCode || null,
         siteId: values.siteId || null,
         jobTitleId: values.jobTitleId || null,
       };
@@ -134,6 +139,9 @@ export function EmployeeForm({ employee, sites, isSuperAdmin, userSiteId, onSucc
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <FormField label={t("nameAr")} error={errors.nameAr?.message} required>
           <Input dir="rtl" {...register("nameAr")} />
+        </FormField>
+        <FormField label={t("employeeCode")} error={errors.employeeCode?.message}>
+          <Input dir="ltr" {...register("employeeCode")} />
         </FormField>
         <FormField label={t("email")} error={errors.email?.message}>
           <Input type="email" dir="ltr" {...register("email")} />

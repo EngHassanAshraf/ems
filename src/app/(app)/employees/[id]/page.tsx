@@ -25,6 +25,7 @@ export default async function EmployeeDetailPage({ params }: { params: Promise<{
 
   const fields = [
     { label: t("nameAr"), value: employee.nameAr },
+    { label: t("employeeCode"), value: employee.employeeCode },
     { label: t("jobTitle"), value: employee.jobTitle?.nameAr ?? null },
     { label: t("site"), value: employee.site?.nameAr ?? null },
     { label: t("email"), value: employee.email },

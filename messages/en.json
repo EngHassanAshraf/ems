@@ -54,6 +54,7 @@
     "noEmployees": "No employees found",
     "noEmployeesDesc": "Start by adding a new employee",
     "nameAr": "Name (Arabic)",
+    "employeeCode": "Employee Code",
     "email": "Email",
     "phone": "Phone",
     "address": "Address",

@@ -11,6 +11,7 @@ import { EmployeeStatus } from "@prisma/client";
 
 const employeeSchema = z.object({
   nameAr: z.string().min(1),
+  employeeCode: z.string().optional().nullable(),
   email: z.string().email().optional().or(z.literal("")).nullable(),
   phone: z.string().optional().nullable(),
   address: z.string().optional().nullable(),

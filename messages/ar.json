@@ -54,6 +54,7 @@
     "noEmployees": "لا يوجد موظفون",
     "noEmployeesDesc": "ابدأ بإضافة موظف جديد",
     "nameAr": "الاسم بالعربية",
+    "employeeCode": "كود الموظف",
     "email": "البريد الإلكتروني",
     "phone": "الهاتف",
     "address": "العنوان",

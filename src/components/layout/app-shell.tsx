@@ -7,16 +7,17 @@ import { Topbar } from "./topbar";
 interface AppShellProps {
   children: React.ReactNode;
   isSuperAdmin: boolean;
+  isSiteSecurityManager?: boolean;
   userId?: string | null;
   userName?: string | null;
   userRole?: string | null;
   avatarUrl?: string | null;
 }
 
-export function AppShell({ children, isSuperAdmin, userId, userName, userRole, avatarUrl }: AppShellProps) {
+export function AppShell({ children, isSuperAdmin, isSiteSecurityManager = false, userId, userName, userRole, avatarUrl }: AppShellProps) {
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
-  const sidebarProps = { isSuperAdmin, userId, userName, userRole, avatarUrl };
+  const sidebarProps = { isSuperAdmin, isSiteSecurityManager, userId, userName, userRole, avatarUrl };
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">

@@ -5,9 +5,12 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getServerUser, isSuperAdmin } from "@/lib/auth/user";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import type { ActionResult } from "@/actions/types";
 import type { Employee, Prisma } from "@prisma/client";
 import { EmployeeStatus } from "@prisma/client";
+
+const AVATAR_BUCKET = "employee-documents";
 
 const employeeSchema = z.object({
   nameAr: z.string().min(1),
@@ -22,18 +25,74 @@ const employeeSchema = z.object({
   jobTitleId: z.string().uuid().optional().nullable(),
 });
 
-export async function createEmployee(input: unknown): Promise<ActionResult<Employee>> {
+/** Upload avatar file and return its storage PATH (not public URL). */
+async function uploadAvatar(employeeId: string, file: File): Promise<string | null> {
+  const ext = file.name.split(".").pop() ?? "jpg";
+  const storagePath = `employee/${employeeId}/avatar/photo.${ext}`;
+  const supabase = createSupabaseAdminClient();
+  const { error } = await supabase.storage
+    .from(AVATAR_BUCKET)
+    .upload(storagePath, file, { upsert: true, contentType: file.type });
+  if (error) {
+    console.error("[uploadAvatar]", error.message);
+    return null;
+  }
+  // Return the storage path — signed URLs are generated at render time
+  return storagePath;
+}
+
+/** Delete avatar from storage if it exists. */
+async function deleteAvatar(avatarPath: string | null) {
+  if (!avatarPath) return;
+  // avatarUrl now stores the storage path directly
+  const supabase = createSupabaseAdminClient();
+  await supabase.storage.from(AVATAR_BUCKET).remove([avatarPath]);
+}
+
+/** Generate a signed URL for an avatar storage path. TTL: 1 hour. */
+export async function getAvatarSignedUrl(storagePath: string): Promise<ActionResult<{ url: string }>> {
+  await getServerUser();
+  try {
+    const supabase = createSupabaseAdminClient();
+    const { data, error } = await supabase.storage
+      .from(AVATAR_BUCKET)
+      .createSignedUrl(storagePath, 3600);
+    if (error || !data) return { success: false, error: "errors.serverError" };
+    return { success: true, data: { url: data.signedUrl } };
+  } catch {
+    return { success: false, error: "errors.serverError" };
+  }
+}
+
+export async function createEmployee(formData: FormData): Promise<ActionResult<Employee>> {
   const user = await getServerUser();
+
+  const input = {
+    nameAr: formData.get("nameAr"),
+    employeeCode: formData.get("employeeCode") || null,
+    email: formData.get("email") || null,
+    phone: formData.get("phone") || null,
+    address: formData.get("address") || null,
+    hireDate: formData.get("hireDate") || null,
+    status: formData.get("status"),
+    firedReason: formData.get("firedReason") || null,
+    siteId: formData.get("siteId") || null,
+    jobTitleId: formData.get("jobTitleId") || null,
+  };
+
   const parsed = employeeSchema.safeParse(input);
   if (!parsed.success) return { success: false, error: "errors.invalidInput" };
 
-  // site_admin can only create employees for their own site
-  const siteId = isSuperAdmin(user)
-    ? (parsed.data.siteId ?? null)
-    : user.siteId;
+  const avatarFile = formData.get("avatar") as File | null;
+  if (!avatarFile || avatarFile.size === 0) {
+    return { success: false, error: "errors.avatarRequired" };
+  }
+
+  const siteId = isSuperAdmin(user) ? (parsed.data.siteId ?? null) : user.siteId;
 
   try {
-    const result = await prisma.employee.create({
+    // Create employee first to get the ID
+    const employee = await prisma.employee.create({
       data: {
         ...parsed.data,
         siteId,
@@ -41,6 +100,19 @@ export async function createEmployee(input: unknown): Promise<ActionResult<Emplo
         hireDate: parsed.data.hireDate ? new Date(parsed.data.hireDate) : null,
       },
     });
+
+    // Upload avatar
+    const avatarUrl = await uploadAvatar(employee.id, avatarFile);
+    if (!avatarUrl) {
+      await prisma.employee.delete({ where: { id: employee.id } });
+      return { success: false, error: "errors.uploadFailed" };
+    }
+
+    const result = await prisma.employee.update({
+      where: { id: employee.id },
+      data: { avatarUrl },
+    });
+
     revalidatePath("/[locale]/employees", "page");
     return { success: true, data: result };
   } catch (err) {
@@ -49,26 +121,34 @@ export async function createEmployee(input: unknown): Promise<ActionResult<Emplo
   }
 }
 
-export async function updateEmployee(id: string, input: unknown): Promise<ActionResult<Employee>> {
+export async function updateEmployee(id: string, input: unknown, avatarFile?: File | null): Promise<ActionResult<Employee>> {
   const user = await getServerUser();
   const parsed = employeeSchema.partial().safeParse(input);
   if (!parsed.success) return { success: false, error: "errors.invalidInput" };
 
-  // site_admin can only update employees in their site
   if (!isSuperAdmin(user)) {
     const existing = await prisma.employee.findUnique({ where: { id }, select: { siteId: true } });
     if (!existing || existing.siteId !== user.siteId) {
       return { success: false, error: "errors.forbidden" };
     }
-    // prevent site_admin from changing siteId
     delete parsed.data.siteId;
   }
 
   try {
+    let avatarUrl: string | undefined;
+    if (avatarFile && avatarFile.size > 0) {
+      // Delete old avatar first
+      const existing = await prisma.employee.findUnique({ where: { id }, select: { avatarUrl: true } });
+      await deleteAvatar(existing?.avatarUrl ?? null);
+      const url = await uploadAvatar(id, avatarFile);
+      if (url) avatarUrl = url;
+    }
+
     const result = await prisma.employee.update({
       where: { id },
       data: {
         ...parsed.data,
+        ...(avatarUrl ? { avatarUrl } : {}),
         email: parsed.data.email !== undefined ? (parsed.data.email || null) : undefined,
         hireDate: parsed.data.hireDate !== undefined
           ? parsed.data.hireDate ? new Date(parsed.data.hireDate) : null
@@ -99,13 +179,17 @@ export async function deleteEmployee(id: string): Promise<ActionResult<null>> {
 
   try {
     const supabase = await createSupabaseServerClient();
-    const documents = await prisma.document.findMany({
-      where: { employeeId: id },
-      select: { storageBucket: true, storagePath: true },
-    });
+    const [documents, employee] = await Promise.all([
+      prisma.document.findMany({
+        where: { employeeId: id },
+        select: { storageBucket: true, storagePath: true },
+      }),
+      prisma.employee.findUnique({ where: { id }, select: { avatarUrl: true } }),
+    ]);
     for (const doc of documents) {
       await supabase.storage.from(doc.storageBucket).remove([doc.storagePath]);
     }
+    await deleteAvatar(employee?.avatarUrl ?? null);
     await prisma.employee.delete({ where: { id } });
     revalidatePath("/[locale]/employees", "page");
     return { success: true, data: null };

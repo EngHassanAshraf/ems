@@ -55,6 +55,7 @@ model Site {
 
   employees    Employee[]
   userProfiles UserProfile[]
+  evaluations  EmployeeEvaluation[]
 
   @@map("sites")
 }
@@ -82,16 +83,18 @@ model Employee {
   hireDate     DateTime?      @map("hire_date") @db.Date
   status       EmployeeStatus @default(active)
   firedReason  String?        @map("fired_reason")
+  avatarUrl    String?        @map("avatar_url")
   siteId       String?        @map("site_id") @db.Uuid
   jobTitleId   String?        @map("job_title_id") @db.Uuid
   createdAt    DateTime       @default(now()) @map("created_at") @db.Timestamptz
   updatedAt    DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
-  site             Site?             @relation(fields: [siteId], references: [id])
-  jobTitle         JobTitle?         @relation(fields: [jobTitleId], references: [id])
+  site             Site?               @relation(fields: [siteId], references: [id])
+  jobTitle         JobTitle?           @relation(fields: [jobTitleId], references: [id])
   documents        Document[]
   attendanceEvents AttendanceEvent[]
   leaveRequests    LeaveRequest[]
+  evaluations      EmployeeEvaluation[]
 
   @@map("employees")
 }
@@ -144,4 +147,56 @@ model LeaveRequest {
   employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   @@map("leave_requests")
+}
+
+enum EvaluationScore {
+  EXCELLENT
+  VERY_GOOD
+  GOOD
+  ACCEPTABLE
+
+  @@map("evaluation_score")
+}
+
+model EvaluationCriteria {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  titleAr       String   @map("title_ar")
+  descriptionAr String?  @map("description_ar")
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  evaluationItems EmployeeEvaluationItem[]
+
+  @@map("evaluation_criteria")
+}
+
+model EmployeeEvaluation {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employeeId String   @map("employee_id") @db.Uuid
+  siteId     String   @map("site_id") @db.Uuid
+  createdBy  String   @map("created_by") @db.Uuid
+  totalScore Float    @map("total_score")
+  finalGrade String?  @map("final_grade")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  employee Employee                 @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  site     Site                     @relation(fields: [siteId], references: [id])
+  items    EmployeeEvaluationItem[]
+
+  @@map("employee_evaluations")
+}
+
+model EmployeeEvaluationItem {
+  id           String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  evaluationId String          @map("evaluation_id") @db.Uuid
+  criteriaId   String          @map("criteria_id") @db.Uuid
+  score        EvaluationScore
+  notes        String?
+
+  evaluation EmployeeEvaluation @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+  criteria   EvaluationCriteria @relation(fields: [criteriaId], references: [id])
+
+  @@map("employee_evaluation_items")
 }

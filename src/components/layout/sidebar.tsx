@@ -5,27 +5,28 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
   LayoutDashboard, Users, FileText, LogOut,
-  ChevronRight, Building2, MapPin, UserCog, Briefcase, BarChart3, UserCircle,
+  ChevronLeft, Building2, MapPin, UserCog, Briefcase, BarChart3, UserCircle, ClipboardList,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { signOut } from "@/actions/auth";
 
 interface NavItem {
   key: string;
-  label: "dashboard" | "employees" | "documents" | "sites" | "users" | "jobTitles" | "totals";
+  label: "dashboard" | "employees" | "documents" | "sites" | "users" | "jobTitles" | "totals" | "criteria" | "evaluations";
   href: string;
   icon: React.ReactNode;
 }
 
 interface SidebarProps {
   isSuperAdmin: boolean;
+  isSiteSecurityManager?: boolean;
   userId?: string | null;
   userName?: string | null;
   userRole?: string | null;
   avatarUrl?: string | null;
 }
 
-export function Sidebar({ isSuperAdmin, userId, userName, userRole, avatarUrl }: SidebarProps) {
+export function Sidebar({ isSuperAdmin, isSiteSecurityManager = false, userId, userName, userRole, avatarUrl }: SidebarProps) {
   const t = useTranslations("app");
   const tu = useTranslations("users");
   const pathname = usePathname();
@@ -34,12 +35,16 @@ export function Sidebar({ isSuperAdmin, userId, userName, userRole, avatarUrl }:
     { key: "dashboard", label: "dashboard", href: "/dashboard", icon: <LayoutDashboard className="h-5 w-5" /> },
     { key: "employees", label: "employees", href: "/employees", icon: <Users className="h-5 w-5" /> },
     { key: "totals", label: "totals", href: "/totals", icon: <BarChart3 className="h-5 w-5" /> },
+    ...(isSuperAdmin || isSiteSecurityManager ? [
+      { key: "evaluations", label: "evaluations" as const, href: "/evaluations", icon: <ClipboardList className="h-5 w-5" /> },
+    ] : []),
+    { key: "documents", label: "documents", href: "/documents", icon: <FileText className="h-5 w-5" /> },
     ...(isSuperAdmin ? [
       { key: "sites", label: "sites" as const, href: "/sites", icon: <MapPin className="h-5 w-5" /> },
       { key: "users", label: "users" as const, href: "/users", icon: <UserCog className="h-5 w-5" /> },
       { key: "jobTitles", label: "jobTitles" as const, href: "/job-titles", icon: <Briefcase className="h-5 w-5" /> },
+      { key: "criteria", label: "criteria" as const, href: "/criteria", icon: <ClipboardList className="h-5 w-5" /> },
     ] : []),
-    { key: "documents", label: "documents", href: "/documents", icon: <FileText className="h-5 w-5" /> },
   ];
 
   return (
@@ -67,7 +72,7 @@ export function Sidebar({ isSuperAdmin, userId, userName, userRole, avatarUrl }:
             >
               {item.icon}
               {t(item.label)}
-              {active && <ChevronRight className="ms-auto h-4 w-4 opacity-50" />}
+              {active && <ChevronLeft className="ms-auto h-4 w-4 opacity-50" />}
             </Link>
           );
         })}

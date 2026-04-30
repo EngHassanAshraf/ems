@@ -10,7 +10,9 @@
     "sites": "المواقع",
     "users": "المستخدمون",
     "jobTitles": "المسميات الوظيفية",
-    "totals": "أعداد مجمعة"
+    "totals": "أعداد مجمعة",
+    "criteria": "بنود التقييم",
+    "evaluations": "التقييمات"
   },
   "common": {
     "search": "بحث...",
@@ -35,7 +37,12 @@
     "invalidCredentials": "البريد الإلكتروني أو كلمة المرور غير صحيحة"
   },
   "errors": {
-    "invalidInput": "يرجى التحقق من المدخلات والمحاولة مرة أخرى."
+    "invalidInput": "يرجى التحقق من المدخلات والمحاولة مرة أخرى.",
+    "avatarRequired": "الصورة الشخصية مطلوبة.",
+    "uploadFailed": "فشل رفع الصورة. يرجى المحاولة مرة أخرى.",
+    "serverError": "حدث خطأ في الخادم. يرجى المحاولة مرة أخرى.",
+    "forbidden": "غير مصرح لك بهذا الإجراء.",
+    "notFound": "السجل غير موجود."
   },
   "dashboard": {
     "welcome": "مرحباً بك",
@@ -84,6 +91,8 @@
     "deleteSuccess": "تم حذف الموظف",
     "deleteTitle": "حذف الموظف",
     "deleteConfirm": "هل أنت متأكد من حذف الموظف \"{name}\"؟ لا يمكن التراجع عن هذا الإجراء.",
+    "avatarRequired": "الصورة الشخصية مطلوبة",
+    "avatarHint": "انقر لرفع صورة",
     "allStatuses":"الكل"
   },
   "documents": {
@@ -186,5 +195,78 @@
     "total": "الإجمالي",
     "noData": "لا توجد بيانات",
     "noDataDesc": "أضف موظفين نشطين مع مواقع ومسميات وظيفية لعرض التقرير"
+  },
+  "evaluations": {
+    "pageTitle": "تقييم الموظف",
+    "evaluationsHistory": "سجل التقييمات",
+    "noEvaluations": "لا توجد تقييمات بعد.",
+    "selectEmployeeTitle": "اختر موظفاً",
+    "selectEmployeeDesc": "اختر موظفاً من القائمة لفتح نموذج التقييم",
+    "noCriteriaTitle": "لا توجد بنود تقييم",
+    "noCriteriaDesc": "يرجى مطالبة المدير العام بإضافة بنود التقييم أولاً",
+    "evaluate": "تقييم",
+    "editEvaluation": "تعديل التقييم",
+    "newEvaluation": "تقييم جديد",
+    "scoreLabel": "التقييم",
+    "notesLabel": "ملاحظات (اختياري)",
+    "notesPlaceholder": "أضف ملاحظات...",
+    "submitCreate": "حفظ التقييم",
+    "submitUpdate": "تحديث التقييم",
+    "scoreRequired": "يرجى اختيار تقييم لهذا البند",
+    "selectScore": "— اختر —",
+    "scoreExcellent": "ممتاز",
+    "scoreVeryGood": "جيد جداً",
+    "scoreGood": "جيد",
+    "scoreAcceptable": "مقبول",
+    "gradeExcellent": "ممتاز",
+    "gradeVeryGood": "جيد جداً",
+    "gradeGood": "جيد",
+    "gradeAcceptable": "مقبول",
+    "resultPageTitle": "نتيجة التقييم",
+    "summaryCard": "ملخص التقييم",
+    "breakdownCard": "تفاصيل التقييم",
+    "visualisationCard": "بيان الدرجات",
+    "employee": "الموظف",
+    "site": "الموقع",
+    "finalScore": "الدرجة النهائية",
+    "finalGrade": "التقدير النهائي",
+    "criterion": "البند",
+    "score": "الدرجة",
+    "notes": "ملاحظات",
+    "totalWeightedSum": "مجموع الدرجات",
+    "averageScore": "متوسط الدرجة",
+    "noItems": "لا توجد بنود.",
+    "backToEmployee": "العودة للموظف",
+    "backToEmployees": "العودة للموظفين",
+    "forbiddenMessage": "ليس لديك صلاحية لعرض هذا التقييم.",
+    "notFoundMessage": "التقييم غير موجود.",
+    "totalScore": "مجموع الدرجات",
+    "acrossCount": "عبر {count} بند",
+    "errors": {
+      "forbidden": "غير مصرح لك بهذا الإجراء.",
+      "notFound": "التقييم غير موجود.",
+      "invalidInput": "يرجى التحقق من المدخلات والمحاولة مرة أخرى.",
+      "serverError": "حدث خطأ في الخادم. يرجى المحاولة مرة أخرى."
+    }
+  },
+  "criteria": {
+    "title": "بنود التقييم",
+    "addCriteria": "إضافة بند تقييم",
+    "editCriteria": "تعديل بند التقييم",
+    "totalCount": "{count} بند تقييم",
+    "noCriteria": "لا توجد بنود تقييم",
+    "noCriteriaDesc": "ابدأ بإضافة بند تقييم جديد",
+    "titleAr": "العنوان بالعربية",
+    "descriptionAr": "الوصف (اختياري)",
+    "status": "الحالة",
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "deactivate": "تعطيل",
+    "deactivateConfirm": "هل أنت متأكد من تعطيل هذا البند؟",
+    "deactivateSuccess": "تم تعطيل البند بنجاح",
+    "deactivateError": "فشل تعطيل البند",
+    "createSuccess": "تم إضافة البند بنجاح",
+    "updateSuccess": "تم تحديث البند",
+    "saveError": "فشل حفظ البند"
   }
 }

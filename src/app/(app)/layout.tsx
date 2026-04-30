@@ -13,6 +13,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <AppShell
       isSuperAdmin={user.role === "super_admin"}
+      isSiteSecurityManager={user.role === "site_security_manager"}
       userId={user.id}
       userName={profile?.fullNameAr ?? user.email ?? null}
       userRole={user.role}

@@ -10,7 +10,9 @@
     "sites": "Sites",
     "users": "Users",
     "jobTitles": "Job Titles",
-    "totals": "Totals"
+    "totals": "Totals",
+    "criteria": "Evaluation Criteria",
+    "evaluations": "Evaluations"
   },
   "common": {
     "search": "Search...",
@@ -35,7 +37,12 @@
     "invalidCredentials": "Invalid email or password"
   },
   "errors": {
-    "invalidInput": "Please check your input and try again."
+    "invalidInput": "Please check your input and try again.",
+    "avatarRequired": "A photo is required.",
+    "uploadFailed": "Failed to upload the photo. Please try again.",
+    "serverError": "A server error occurred. Please try again.",
+    "forbidden": "You are not authorized to perform this action.",
+    "notFound": "Record not found."
   },
   "dashboard": {
     "welcome": "Welcome back",
@@ -83,7 +90,9 @@
     "updateSuccess": "Employee updated successfully",
     "deleteSuccess": "Employee deleted",
     "deleteTitle": "Delete Employee",
-    "deleteConfirm": "Are you sure you want to delete \"{name}\"? This action cannot be undone."
+    "deleteConfirm": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
+    "avatarRequired": "A photo is required",
+    "avatarHint": "Click to upload a photo"
   },
   "documents": {
     "title": "Documents",
@@ -185,5 +194,78 @@
     "total": "Total",
     "noData": "No report data",
     "noDataDesc": "Add active employees with sites and job titles to see the report"
+  },
+  "evaluations": {
+    "pageTitle": "Evaluate Employee",
+    "evaluationsHistory": "Evaluations History",
+    "noEvaluations": "No evaluations yet.",
+    "selectEmployeeTitle": "Select an Employee",
+    "selectEmployeeDesc": "Select an employee from the list to open their evaluation form",
+    "noCriteriaTitle": "No Evaluation Criteria",
+    "noCriteriaDesc": "Ask a super admin to add evaluation criteria first",
+    "evaluate": "Evaluate",
+    "editEvaluation": "Edit Evaluation",
+    "newEvaluation": "New Evaluation",
+    "scoreLabel": "Score",
+    "notesLabel": "Notes (optional)",
+    "notesPlaceholder": "Add notes...",
+    "submitCreate": "Save Evaluation",
+    "submitUpdate": "Update Evaluation",
+    "scoreRequired": "Please select a score for this criterion",
+    "selectScore": "— Select —",
+    "scoreExcellent": "Excellent",
+    "scoreVeryGood": "Very Good",
+    "scoreGood": "Good",
+    "scoreAcceptable": "Acceptable",
+    "gradeExcellent": "Excellent",
+    "gradeVeryGood": "Very Good",
+    "gradeGood": "Good",
+    "gradeAcceptable": "Acceptable",
+    "resultPageTitle": "Evaluation Result",
+    "summaryCard": "Evaluation Summary",
+    "breakdownCard": "Score Breakdown",
+    "visualisationCard": "Score Visualisation",
+    "employee": "Employee",
+    "site": "Site",
+    "finalScore": "Final Score",
+    "finalGrade": "Final Grade",
+    "criterion": "Criterion",
+    "score": "Score",
+    "notes": "Notes",
+    "totalWeightedSum": "Total Weighted Sum",
+    "averageScore": "Average Score",
+    "noItems": "No items found.",
+    "backToEmployee": "Back to Employee",
+    "backToEmployees": "Back to Employees",
+    "forbiddenMessage": "You do not have permission to view this evaluation.",
+    "notFoundMessage": "Evaluation not found.",
+    "totalScore": "Total Score",
+    "acrossCount": "across {count} {count, plural, one {criterion} other {criteria}}",
+    "errors": {
+      "forbidden": "You are not authorized to perform this action.",
+      "notFound": "Evaluation not found.",
+      "invalidInput": "Please check your input and try again.",
+      "serverError": "A server error occurred. Please try again."
+    }
+  },
+  "criteria": {
+    "title": "Evaluation Criteria",
+    "addCriteria": "Add Criterion",
+    "editCriteria": "Edit Criterion",
+    "totalCount": "{count} criteria",
+    "noCriteria": "No evaluation criteria",
+    "noCriteriaDesc": "Start by adding a new evaluation criterion",
+    "titleAr": "Title (Arabic)",
+    "descriptionAr": "Description (optional)",
+    "status": "Status",
+    "active": "Active",
+    "inactive": "Inactive",
+    "deactivate": "Deactivate",
+    "deactivateConfirm": "Are you sure you want to deactivate this criterion?",
+    "deactivateSuccess": "Criterion deactivated successfully",
+    "deactivateError": "Failed to deactivate criterion",
+    "createSuccess": "Criterion created successfully",
+    "updateSuccess": "Criterion updated successfully",
+    "saveError": "Failed to save criterion"
   }
 }

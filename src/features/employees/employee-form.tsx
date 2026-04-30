@@ -1,10 +1,11 @@
 "use client";
 
-import { useTransition, useEffect, useState } from "react";
+import { useTransition, useEffect, useState, useRef } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslations } from "next-intl";
+import { UserCircle, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -45,7 +46,7 @@ const schema = z
 type FormValues = z.infer<typeof schema>;
 
 interface EmployeeFormProps {
-  employee?: Employee & { siteId?: string | null; jobTitleId?: string | null; firedReason?: string | null };
+  employee?: Employee & { siteId?: string | null; jobTitleId?: string | null; firedReason?: string | null; avatarUrl?: string | null };
   sites: SiteRow[];
   isSuperAdmin: boolean;
   userSiteId: string | null;
@@ -56,9 +57,27 @@ interface EmployeeFormProps {
 export function EmployeeForm({ employee, sites, isSuperAdmin, userSiteId, onSuccess, onCancel }: EmployeeFormProps) {
   const t = useTranslations("employees");
   const tc = useTranslations("common");
+  const te = useTranslations("errors");
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
   const [jobTitles, setJobTitles] = useState<JobTitleRow[]>([]);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Load signed URL for existing avatar on mount
+  useEffect(() => {
+    if (employee?.avatarUrl) {
+      import("@/actions/employees").then(({ getAvatarSignedUrl }) => {
+        getAvatarSignedUrl(employee.avatarUrl!).then((result) => {
+          if (result.success) setAvatarPreview(result.data.url);
+        });
+      });
+    }
+  }, [employee?.avatarUrl]);
+
+  const isCreate = !employee;
 
   const { register, handleSubmit, control, reset, formState: { errors, isSubmitting } } = useForm<FormValues>({
     resolver: zodResolver(schema) as any,
@@ -88,7 +107,6 @@ export function EmployeeForm({ employee, sites, isSuperAdmin, userSiteId, onSucc
     listJobTitles().then((r) => {
       if (r.success) {
         setJobTitles(r.data);
-        // Re-apply defaultValues after options load so the select shows the correct value
         if (employee) {
           reset({
             nameAr: employee.nameAr,
@@ -109,33 +127,101 @@ export function EmployeeForm({ employee, sites, isSuperAdmin, userSiteId, onSucc
 
   const status = useWatch({ control, name: "status" });
 
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+    setAvatarFile(file);
+    setAvatarError(null);
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setAvatarPreview(url);
+    }
+  };
+
   const onSubmit = (values: FormValues) => {
+    // Validate avatar required on create
+    if (isCreate && !avatarFile) {
+      setAvatarError(t("avatarRequired"));
+      return;
+    }
+
     startTransition(async () => {
-      const clean = {
-        ...values,
-        email: values.email || null,
-        phone: values.phone || null,
-        address: values.address || null,
-        hireDate: values.hireDate || null,
-        firedReason: values.status === "fired" ? (values.firedReason || null) : null,
-        employeeCode: values.employeeCode || null,
-        siteId: values.siteId || null,
-        jobTitleId: values.jobTitleId || null,
-      };
-      const result = employee
-        ? await updateEmployee(employee.id, clean)
-        : await createEmployee(clean);
-      if (!result.success) {
-        toast("error", t(result.error as any));
+      if (isCreate) {
+        // Build FormData for create (includes file)
+        const fd = new FormData();
+        Object.entries(values).forEach(([k, v]) => {
+          if (v != null && v !== "") fd.append(k, String(v));
+        });
+        fd.append("avatar", avatarFile!);
+
+        const result = await createEmployee(fd);
+        if (!result.success) {
+          const key = result.error.replace(/^errors\./, "") as any;
+          toast("error", te(key));
+        } else {
+          toast("success", t("createSuccess"));
+          onSuccess();
+        }
       } else {
-        toast("success", employee ? t("updateSuccess") : t("createSuccess"));
-        onSuccess();
+        // Update: pass plain object + optional file separately
+        const clean = {
+          ...values,
+          email: values.email || null,
+          phone: values.phone || null,
+          address: values.address || null,
+          hireDate: values.hireDate || null,
+          firedReason: values.status === "fired" ? (values.firedReason || null) : null,
+          employeeCode: values.employeeCode || null,
+          siteId: values.siteId || null,
+          jobTitleId: values.jobTitleId || null,
+        };
+        const result = await updateEmployee(employee!.id, clean, avatarFile ?? undefined);
+        if (!result.success) {
+          const key = result.error.replace(/^errors\./, "") as any;
+          toast("error", te(key));
+        } else {
+          toast("success", t("updateSuccess"));
+          onSuccess();
+        }
       }
     });
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+      {/* Avatar upload */}
+      <div className="flex flex-col items-center gap-3">
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          className="relative group h-24 w-24 rounded-full overflow-hidden border-2 border-dashed border-input hover:border-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          {avatarPreview ? (
+            <img src={avatarPreview} alt="" className="h-full w-full object-cover" />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-muted">
+              <UserCircle className="h-12 w-12 text-muted-foreground" />
+            </div>
+          )}
+          <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+            <Upload className="h-6 w-6 text-white" />
+          </div>
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleAvatarChange}
+        />
+        <div className="text-center">
+          <p className="text-xs text-muted-foreground">
+            {t("avatarHint")}
+            {isCreate && <span className="text-destructive ms-1">*</span>}
+          </p>
+          {avatarError && <p className="text-xs text-destructive mt-1">{avatarError}</p>}
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <FormField label={t("nameAr")} error={errors.nameAr?.message} required>
           <Input dir="rtl" {...register("nameAr")} />

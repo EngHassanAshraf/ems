@@ -54,7 +54,10 @@ describe("Property 1: Server Action input validation rejects invalid inputs", ()
         async (invalidInput) => {
           mockEmployeeCreate.mockClear();
 
-          const result = await createEmployee(invalidInput as unknown);
+          const fd = new FormData();
+          Object.entries(invalidInput).forEach(([k, v]) => fd.append(k, String(v)));
+
+          const result = await createEmployee(fd);
 
           expect(result.success).toBe(false);
           expect(typeof (result as { success: false; error: string }).error).toBe("string");
@@ -95,7 +98,10 @@ describe("Property 2: Server Action success response shape", () => {
           };
           mockEmployeeCreate.mockResolvedValueOnce(fakeEmployee);
 
-          const result = await createEmployee(input);
+          const fd = new FormData();
+          Object.entries(input).forEach(([k, v]) => fd.append(k, String(v)));
+
+          const result = await createEmployee(fd);
 
           expect(result.success).toBe(true);
           if (result.success) {
@@ -118,8 +124,9 @@ describe("Property 3: Server Actions require an authenticated session", () => {
           mockEmployeeCreate.mockClear();
           mockGetServerUser.mockRejectedValueOnce(new Error("NEXT_REDIRECT"));
 
+          const fd = new FormData();
           try {
-            await createEmployee(anyInput as any);
+            await createEmployee(fd);
           } catch {
             // redirect throws — that's expected
           }
@@ -161,7 +168,10 @@ describe("Property 4: Employee mutation round-trip", () => {
           };
           mockEmployeeCreate.mockResolvedValueOnce(fakeEmployee);
 
-          const result = await createEmployee(input);
+          const fd = new FormData();
+          Object.entries(input).forEach(([k, v]) => fd.append(k, String(v)));
+
+          const result = await createEmployee(fd);
 
           if (result.success) {
             expect(result.data.nameAr).toBe(input.nameAr);
@@ -188,7 +198,10 @@ describe("Property 7: Server Action errors return i18n keys", () => {
       fc.asyncProperty(
         fc.record({ nameAr: fc.constant("") }),
         async (invalidInput) => {
-          const result = await createEmployee(invalidInput as unknown);
+          const fd = new FormData();
+          Object.entries(invalidInput).forEach(([k, v]) => fd.append(k, String(v)));
+
+          const result = await createEmployee(fd);
 
           if (!result.success) {
             expect(I18N_KEY_PATTERN.test(result.error)).toBe(true);

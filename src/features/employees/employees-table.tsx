@@ -5,6 +5,7 @@ import { Pencil, Trash2, Eye, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { EmployeeStatusBadge } from "./employee-status-badge";
+import { EmployeeAvatar } from "./employee-avatar";
 import type { Employee } from "@prisma/client";
 
 type EmployeeWithSite = Employee & { site: { nameAr: string } | null; jobTitle: { nameAr: string } | null };
@@ -36,6 +37,7 @@ export function EmployeesTable({ employees, isSuperAdmin, onEdit, onDelete, onVi
       <table className="min-w-full text-sm">
         <thead className="bg-muted/50 text-muted-foreground">
           <tr>
+            <th className="p-3 text-start font-medium w-10"></th>
             <th className="p-3 text-start font-medium">{t("nameAr")}</th>
             <th className="p-3 text-start font-medium hidden sm:table-cell">{t("jobTitle")}</th>
             {isSuperAdmin && <th className="p-3 text-start font-medium hidden lg:table-cell">{t("site")}</th>}
@@ -46,6 +48,12 @@ export function EmployeesTable({ employees, isSuperAdmin, onEdit, onDelete, onVi
         <tbody className="divide-y divide-border">
           {employees.map((emp) => (
             <tr key={emp.id} className="hover:bg-muted/30 transition-colors">
+              <td className="p-3">
+                <EmployeeAvatar
+                  storagePath={emp.avatarUrl}
+                  name={emp.nameAr}
+                />
+              </td>
               <td className="p-3 font-medium">{emp.nameAr}</td>
               <td className="p-3 text-muted-foreground hidden sm:table-cell">{emp.jobTitle?.nameAr ?? "—"}</td>
               {isSuperAdmin && <td className="p-3 text-muted-foreground hidden lg:table-cell">{emp.site?.nameAr ?? "—"}</td>}
